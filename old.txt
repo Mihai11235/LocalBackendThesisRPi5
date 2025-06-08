@@ -1,0 +1,26 @@
+
+# def generate_frames():
+#     while True:
+#         frame = picam2.capture_array()
+#         original_array, input_data = preprocess(frame, height, width)
+
+#         input_details = interpreter.get_input_details()[0]
+#         scale, zero_point = input_details['quantization']
+#         input_quant = (input_data / scale + zero_point).astype(np.uint8)
+#         common.set_input(interpreter, input_quant)
+
+#         output_details = interpreter.get_output_details()[0]
+#         out_scale, out_zero = output_details['quantization']
+
+#         interpreter.invoke()
+#         output = segment.get_output(interpreter).astype(np.float32)
+#         output = out_scale * (output - out_zero)
+
+#         mask_bin = postprocess(original_array, output)
+#         result = add_overlay(original_array, mask_bin)
+
+#         _, buffer = cv2.imencode('.jpg', result)
+#         frame_bytes = buffer.tobytes()
+
+#         yield (b'--frame\r\n'
+#                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
