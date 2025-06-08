@@ -1,5 +1,9 @@
 numpy<2
 Pillow
 opencv-python
-Flask
+Flask[async]
+flask-cors
 opencv-python-headless
+flask-sock
+fastapi
+uvicorn

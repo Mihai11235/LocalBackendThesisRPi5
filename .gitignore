@@ -1,3 +1,24 @@
-.venv
-.well-known
-ssl
+# Virtual environments
+.venv/
+
+# SSL + other folders
+.well-known/
+ssl/
+
+# Python junk
+__pycache__/
+*.pyc
+
+# Media
+*.jpg
+*.png
+*.mp4
+
+# Ignore model1 directory
+model1/
+
+# Ignore specific files
+server.py
+newserver.py
+lane_dashboard.py
+instant.py

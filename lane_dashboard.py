@@ -11,8 +11,8 @@ from picamera2.utils import Transform
 
 app = Flask(__name__)
 
-# Load EdgeTPU model
-interpreter = make_interpreter("model/model_quant_edgetpu.tflite", device=':0')
+# Load EdgeTPU model1
+interpreter = make_interpreter("model1/model_quant_edgetpu.tflite", device=':0')
 interpreter.allocate_tensors()
 width, height = common.input_size(interpreter)
 
@@ -49,40 +49,16 @@ def add_overlay(original_array, mask_bin):
     blended = cv2.addWeighted(original_array, 1.0, overlay, 0.6, 0)
     return blended
 
-# def generate_frames():
-#     while True:
-#         frame = picam2.capture_array()
-#         original_array, input_data = preprocess(frame, height, width)
-
-#         input_details = interpreter.get_input_details()[0]
-#         scale, zero_point = input_details['quantization']
-#         input_quant = (input_data / scale + zero_point).astype(np.uint8)
-#         common.set_input(interpreter, input_quant)
-
-#         output_details = interpreter.get_output_details()[0]
-#         out_scale, out_zero = output_details['quantization']
-
-#         interpreter.invoke()
-#         output = segment.get_output(interpreter).astype(np.float32)
-#         output = out_scale * (output - out_zero)
-
-#         mask_bin = postprocess(original_array, output)
-#         result = add_overlay(original_array, mask_bin)
-
-#         _, buffer = cv2.imencode('.jpg', result)
-#         frame_bytes = buffer.tobytes()
-
-#         yield (b'--frame\r\n'
-#                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
-
 
 def generate_frames():
     frame_width = 1280
-    center_tolerance = 100  # pixels tolerance before triggering warning
+    center_tolerance = 200  # pixels tolerance before triggering warning
 
     while True:
         frame = picam2.capture_array()
         original_array, input_data = preprocess(frame, height, width)
+
+        prev_time = time.time()
 
         # Inference
         input_details = interpreter.get_input_details()[0]
@@ -100,6 +76,10 @@ def generate_frames():
         # Postprocess
         mask_bin = postprocess(original_array, output)
         overlay = add_overlay(original_array, mask_bin)
+
+        curr_time = time.time()
+        fps = 1.0 / (curr_time - prev_time)
+        prev_time = curr_time
 
         # Calculate lane center
         nonzero = np.column_stack(np.where(mask_bin > 0))  # (y, x)
@@ -122,6 +102,18 @@ def generate_frames():
                 (overlay.shape[1] // 6, overlay.shape[0] // 2),
                 cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3, cv2.LINE_AA
             )
+
+        # Encode for MJPEG streaming
+        _, buffer = cv2.imencode('.jpg', overlay)
+        frame_bytes = buffer.tobytes()
+
+
+        cv2.putText(
+            overlay, f'FPS: {fps:.2f}',
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX, 1,
+            (0, 255, 0), 2, cv2.LINE_AA
+        )
 
         # Encode for MJPEG streaming
         _, buffer = cv2.imencode('.jpg', overlay)
