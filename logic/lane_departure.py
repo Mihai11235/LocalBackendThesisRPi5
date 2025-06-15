@@ -38,7 +38,7 @@ class LaneDepartureDetector:
         cv2.line(overlay, (middle_x, 0), (middle_x, height), (1, 1), 2)  # White vertical line
         cv2.line(overlay, (0, coord_y), (width, coord_y), (1, 1), 2)
 
-        if abs(middle_x - lane_middle) // 2 > 50:
+        if abs(middle_x - lane_middle) > 100:
             cv2.putText(overlay, "Lane Departure Warning!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 1), 2)
             return "lane_departure"
 

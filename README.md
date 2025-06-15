@@ -1,5 +1,12 @@
 # rp5_licenta
 
+
+Run unittests:
+
+python -m unittest discover
+
+
+
 <!-- python model1/semantic_segmentation.py --model1 model1/model_quant_edgetpu.tflite --input model1/image.jpg -->
 
 
